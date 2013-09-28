@@ -22,22 +22,26 @@ def reverseRotatePoint(point, center, angle):
 	point['y'] = y
 	return point
 
-def deltaCoorToDeltaSize(deltaCoor, angle):
+def deltaCoorToDeltaSize4(deltaCoor, angle):
 #For down-right point fixed only
 	dw = -deltaCoor['x']*math.cos(angle) - deltaCoor['y']*math.sin(angle)
 	dh = -deltaCoor['y']*math.cos(angle) + deltaCoor['x']*math.sin(angle)
 	deltaSize={'width':dw, 'height':dh}	
 	return deltaSize
 
-#main function
-def topleftDrag(rect,deltaCoor):
+#main function 1
+def topleftDrag1(rect,deltaCoor):
 #Calculate rotated down-right point
-	x = rect['left'] + rect['width'] 
-	y = rect['top'] + rect['height'] 
+	x = rect['left'] + rect['width']/2.0 
+	y = rect['top'] + rect['height']/2.0 
+	center = {'x':x, 'y':y}
+	x = rect['left'] + rect['width']
+	y = rect['top'] + rect['height']
 	downRightPoint = {'x':x, 'y':y}
+	rotatedDownRightPoint = rotatePoint(downRightPoint, center, rect['rot'])
 
 #Calculate delta of size
-	deltaSize = deltaCoorToDeltaSize(deltaCoor, rect['rot'])
+	deltaSize = deltaCoorToDeltaSize4(deltaCoor, rect['rot'])
 	
 #Calculate resized and rotated top-left point
 	w = rect['width'] + deltaSize['width']
@@ -53,10 +57,19 @@ def topleftDrag(rect,deltaCoor):
 	topLeftPoint = reverseRotatePoint(topLeftPoint, center, rect['rot']) 
 
 #Return new rectangle
-	rect = {'top':topLeftPoint['y'], 'left':topLeftPoint['x'], 'rot':rect['rot'], 'width':w, 'height':h}
-	return rect
+	newRect = {'top':topLeftPoint['y'], 'left':topLeftPoint['x'], 'rot':rect['rot'], 'width':w, 'height':h}
+	return newRect 
 
-originRect={'top':100, 'left':100, 'width':150, 'height':150, 'rot':20}
-deltaCoor={'x':23, 'y':54}
-print topleftDrag(originRect, deltaCoor)
+#main function 2
+def topleftDrag2(rect, deltaCoor):
+	left = (math.cos(2*rect['rot'])+math.cos(rect['rot']))*deltaCoor['x']/2.0 + (math.sin(2*rect['rot'])+math.sin(rect['rot']))*deltaCoor['y']/2.0 + rect['left']
+	top = -(math.sin(2*rect['rot'])+math.sin(rect['rot']))*deltaCoor['x']/2.0 + (math.cos(2*rect['rot'])+math.cos(rect['rot']))*deltaCoor['y']/2.0 + rect['top'] 
+	width = rect['width'] - deltaCoor['x']*math.cos(rect['rot']) - deltaCoor['y']*math.sin(rect['rot'])
+	height = rect['height'] - deltaCoor['y']*math.cos(rect['rot']) + deltaCoor['x']*math.sin(rect['rot'])
+	newRect={'top':top, 'left':left, 'width':width, 'height':height, 'rot':rect['rot']}
+	return newRect 
 
+originRect={'top':100, 'left':100, 'width':50, 'height':150, 'rot':math.pi/4}
+deltaCoor={'x':20, 'y':30}
+print topleftDrag1(originRect, deltaCoor)
+print topleftDrag2(originRect, deltaCoor)
